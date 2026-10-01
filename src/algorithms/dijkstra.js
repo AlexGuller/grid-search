@@ -12,6 +12,7 @@ class MinHeap {
     if (this.heap.length === 1) {
       return this.heap.pop();
     }
+
     const min = this.heap[0];
     this.heap[0] = this.heap.pop();
 
@@ -20,6 +21,7 @@ class MinHeap {
     return min;
   }
 
+  // Restore min-heap order after inserting a node.
   bubbleUp() {
     let index = this.heap.length - 1;
 
@@ -39,6 +41,7 @@ class MinHeap {
     }
   }
 
+  // Restore min-heap order after removing the minimum.
   bubbleDown() {
     let index = 0;
 
@@ -81,18 +84,17 @@ class MinHeap {
 }
 
 export function dijkstra(grid, startNode, endNode) {
+  // Priority queue always explores the lowest-cost node next.
   const frontier = new MinHeap();
 
   const distances = new Map();
   const parents = new Map();
   const visited = new Set();
-
   const visitedNodesInOrder = [];
 
   const startKey = `${startNode.row}-${startNode.col}`;
 
   distances.set(startKey, 0);
-
   frontier.push(startNode, 0);
 
   while (frontier.length > 0) {
@@ -108,8 +110,12 @@ export function dijkstra(grid, startNode, endNode) {
     visitedNodesInOrder.push(current);
 
     if (current.row === endNode.row && current.col === endNode.col) {
-      return { visitedNodesInOrder, path: buildPath(current, parents) };
+      return {
+        visitedNodesInOrder,
+        path: buildPath(current, parents),
+      };
     }
+
     const directions = [
       [-1, 0],
       [1, 0],
@@ -131,20 +137,20 @@ export function dijkstra(grid, startNode, endNode) {
       }
 
       const neighbor = grid[newRow][newCol];
+
       if (neighbor.isWall) {
         continue;
       }
 
       const neighborKey = `${neighbor.row}-${neighbor.col}`;
-
       const currentDistance = distances.get(currentKey);
 
-      const weight = neighbor.weight;
-
-      const newDistance = currentDistance + weight;
+      // Cost to reach this neighbor through the current node.
+      const newDistance = currentDistance + neighbor.weight;
 
       const oldDistance = distances.get(neighborKey) ?? Infinity;
 
+      // Keep the cheaper route if one is found.
       if (newDistance < oldDistance) {
         distances.set(neighborKey, newDistance);
         parents.set(neighborKey, current);
@@ -152,20 +158,22 @@ export function dijkstra(grid, startNode, endNode) {
       }
     }
   }
+
   return {
     visitedNodesInOrder,
     path: [],
   };
 }
+
 function buildPath(endNode, parents) {
   const path = [];
   let current = endNode;
 
+  // Follow parent links backward from end to start.
   while (current) {
     path.push(current);
 
     const key = `${current.row}-${current.col}`;
-
     current = parents.get(key);
   }
 

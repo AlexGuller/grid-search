@@ -1,14 +1,18 @@
 import "./App.css";
 import { useState, useRef } from "react";
+
 import { bfs } from "./algorithms/bfs";
 import { dfs } from "./algorithms/dfs";
 import { dijkstra } from "./algorithms/dijkstra";
 
 function App() {
+  // Store animation timers so searches can be cancelled.
   const timeouts = useRef([]);
+
   const rows = 25;
   const cols = 25;
 
+  // Create the initial grid.
   const createGrid = () =>
     Array.from({ length: rows }, (_, row) =>
       Array.from({ length: cols }, (_, col) => ({
@@ -24,9 +28,9 @@ function App() {
     );
 
   const [editMode, setEditMode] = useState("wall");
-
   const [grid, setGrid] = useState(createGrid);
 
+  // Information displayed for the currently selected algorithm.
   const [stats, setStats] = useState({
     algorithm: "---",
     time: "---",
@@ -56,7 +60,7 @@ function App() {
   };
 
   const dijkstraStats = {
-    algorithm: "Dijkstra's Algorithm(Manhattan)",
+    algorithm: "Dijkstra's Algorithm",
     time: "O((V + E) log V)",
     space: "O(V)",
     frontier: "Min-Priority Queue",
@@ -65,6 +69,7 @@ function App() {
       "Expands nodes in order of lowest cumulative cost from the start.",
   };
 
+  // Modify a cell based on the current drawing mode.
   function handleCellClick(row, col) {
     const newGrid = grid.map((currentRow) =>
       currentRow.map((cell) => {
@@ -96,6 +101,8 @@ function App() {
 
     setGrid(newGrid);
   }
+
+  // Run any search algorithm through the same visualization pipeline.
   function runAlgorithm(searchFunction, algorithmStats) {
     clearAnimations();
 
@@ -115,6 +122,7 @@ function App() {
     animateVisitedNodes(visitedNodesInOrder, path);
   }
 
+  // Animate cells in the order the algorithm explores them.
   function animateVisitedNodes(visitedNodes, path) {
     visitedNodes.forEach((node, index) => {
       const timeout = setTimeout(() => {
@@ -127,37 +135,48 @@ function App() {
                   isVisited: true,
                 };
               }
+
               return cell;
             }),
           ),
         );
       }, index * 8);
+
       timeouts.current.push(timeout);
     });
+
     const pathTimeout = setTimeout(() => {
       animatePath(path);
     }, visitedNodes.length * 8);
+
     timeouts.current.push(pathTimeout);
   }
 
-  function animatePath(shortestPath) {
-    shortestPath.forEach((node, index) => {
+  // Animate the final path after the search finishes.
+  function animatePath(path) {
+    path.forEach((node, index) => {
       const timeout = setTimeout(() => {
         setGrid((currentGrid) =>
           currentGrid.map((row) =>
             row.map((cell) => {
               if (cell.row === node.row && cell.col === node.col) {
-                return { ...cell, isPath: true };
+                return {
+                  ...cell,
+                  isPath: true,
+                };
               }
+
               return cell;
             }),
           ),
         );
       }, index * 20);
+
       timeouts.current.push(timeout);
     });
   }
 
+  // Clear search results while preserving walls and weights.
   function clearSearch() {
     const clearedGrid = grid.map((row) =>
       row.map((cell) => ({
@@ -166,17 +185,22 @@ function App() {
         isPath: false,
       })),
     );
+
     setGrid(clearedGrid);
+
     return clearedGrid;
   }
 
+  // Cancel any animation still running.
   function clearAnimations() {
     timeouts.current.forEach((timeout) => {
       clearTimeout(timeout);
     });
+
     timeouts.current = [];
   }
 
+  // Restore the application to its initial state.
   function resetGrid() {
     clearAnimations();
 
@@ -262,6 +286,7 @@ function App() {
               >
                 Weight
               </button>
+
               <button className="tool-button reset-button" onClick={resetGrid}>
                 Reset
               </button>
@@ -287,6 +312,7 @@ function App() {
                   } else if (cell.weight > 1) {
                     className += " weighted";
                   }
+
                   return (
                     <div
                       className={className}
@@ -328,10 +354,12 @@ function App() {
             <span>Optimal</span>
             <span>{stats.optimal}</span>
           </div>
+
           <p className="algorithm-description">{stats.description}</p>
         </div>
       </div>
     </div>
   );
 }
+
 export default App;

@@ -5,6 +5,7 @@ export function dfs(grid, startNode, endNode) {
   const visitedNodesInOrder = [];
 
   while (stack.length > 0) {
+    // DFS explores the most recently added node first.
     const current = stack.pop();
     const currentKey = `${current.row}-${current.col}`;
 
@@ -43,6 +44,7 @@ export function dfs(grid, startNode, endNode) {
         const key = `${newRow}-${newCol}`;
 
         if (!neighbor.isWall && !visited.has(key)) {
+          // Record how the node was first reached for path reconstruction.
           if (!parents.has(key)) {
             parents.set(key, current);
           }
@@ -63,6 +65,7 @@ function buildPath(endNode, parents) {
   const path = [];
   let current = endNode;
 
+  // Follow parent links backward from end to start.
   while (current) {
     path.push(current);
 

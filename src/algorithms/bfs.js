@@ -5,10 +5,10 @@ export function bfs(grid, startNode, endNode) {
   const visitedNodesInOrder = [];
 
   const startKey = `${startNode.row}-${startNode.col}`;
-
   visited.add(startKey);
 
   while (queue.length > 0) {
+    // BFS explores nodes in FIFO order.
     const current = queue.shift();
 
     visitedNodesInOrder.push(current);
@@ -41,6 +41,7 @@ export function bfs(grid, startNode, endNode) {
         if (!neighbor.isWall && !visited.has(key)) {
           visited.add(key);
 
+          // Store the previous node so the final path can be rebuilt.
           parents.set(key, current);
 
           queue.push(neighbor);
@@ -48,21 +49,23 @@ export function bfs(grid, startNode, endNode) {
       }
     }
   }
+
   return { visitedNodesInOrder, path: [] };
 }
 
 function buildPath(endNode, parents) {
   const path = [];
-
   let current = endNode;
 
+  // Follow parent links backward from end to start.
   while (current) {
     path.push(current);
 
     const key = `${current.row}-${current.col}`;
-
     current = parents.get(key);
   }
+
   path.reverse();
+
   return path;
 }
